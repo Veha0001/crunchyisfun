@@ -2,9 +2,9 @@
 
 Crunchyroll (Android) UI base on Funimation themes. but why?
 
-| Home                  | Tab                  |
-| --------------------- | -------------------- |
-| [Home](./media/1.jpg) | [Tab](./media/2.jpg) |
+| Home                   | Tab                   |
+| ---------------------- | --------------------- |
+| ![Home](./media/1.jpg) | ![Tab](./media/2.jpg) |
 
 ## Disclaimer
 
