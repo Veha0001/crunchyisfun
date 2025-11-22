@@ -1,4 +1,4 @@
-# Crunchyisfun
+# CrunchyisFun
 
 Crunchyroll (Android) UI base on Funimation themes. but why?
 
@@ -25,9 +25,10 @@ or distributing this modified application.
 
 ```bash
 git clone https://github.com/Veha0001/crunchyisfun.git
+cd crunchyisfun
 ```
 
-- install dependencies
+- Install dependencies
 
 ```bash
 pip install typer demodapk --upgrade
