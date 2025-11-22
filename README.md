@@ -2,6 +2,10 @@
 
 Crunchyroll (Android) UI base on Funimation themes. but why?
 
+| Home                  | Tab                  |
+| --------------------- | -------------------- |
+| [Home](./media/1.jpg) | [Tab](./media/2.jpg) |
+
 ## Disclaimer
 
 This project does not affiliate with Funimation or Crunchyroll.
@@ -26,7 +30,7 @@ git clone https://github.com/Veha0001/crunchyisfun.git
 - install dependencies
 
 ```bash
-pip install demodapk --upgrade
+pip install typer demodapk --upgrade
 ```
 
 - Create config
@@ -69,11 +73,13 @@ For Funimation logo and icon:
 
 **Revanced** patches for reference on how to hide ads.
 
-#### Need help? etc.
+#### Need help? etc
 
 open issue.
 
 yes please. give me pull request. (free)
+
+the code is writen in python and some are generated code.
 
 ##### Some plan ideas
 

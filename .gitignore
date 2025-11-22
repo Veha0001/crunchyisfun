@@ -1,3 +1,12 @@
+# demo
+config.json
+vendor/
+src/
+*.apk
+*.zip
+*.apks
+*.xapk
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

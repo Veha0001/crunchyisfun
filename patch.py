@@ -1,76 +1,82 @@
+"""
+Search smali files for a boolean field related to "enableAds"
+and force its constructor initialization to always be false.
+"""
+
 import os
 import re
+from pathlib import Path
 
-SMALI_ROOT = os.environ["BASE_SMALI"]
+SMALI_ROOT = Path(os.environ["BASE_SMALI"])
+
+
+def find_enable_ads(root_dir: Path):
+    """Locate the enableAds field and the smali file that contains it."""
+    for path in root_dir.rglob("*.smali"):
+        lines = path.read_text(encoding="utf-8").splitlines()
+
+        for i, line in enumerate(lines):
+            if '", enableAds="' not in line:
+                continue
+
+            # Search the next 8 lines for iget-boolean
+            for j in range(1, 9):
+                if i + j >= len(lines):
+                    break
+
+                candidate = lines[i + j]
+                match = re.search(r"iget-boolean\s+\S+,\s+\S+,\s+(\S+)", candidate)
+                if match:
+                    return match.group(1), path
+
+    return None, None
+
+
+def patch_smali(path: Path, enable_ads: str):
+    """Patch the smali constructor to set enableAds to false."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    new = []
+
+    in_constructor = False
+    patched = False
+    field_name = enable_ads.split("->")[1]
+
+    for line in lines:
+        # Remove "final" if present on the field
+        if re.search(rf"\.field .* final {re.escape(field_name)}", line):
+            line = line.replace(" final", "")
+
+        # Detect constructor
+        if line.startswith(".method public constructor"):
+            in_constructor = True
+
+        # Insert our patch before return-void
+        if in_constructor and "return-void" in line and not patched:
+            new.append("    move-object/from16 v0, p0")
+            new.append("    const/4 v1, 0x0")
+            new.append(f"    iput-boolean v1, v0, {enable_ads}")
+            patched = True
+
+        new.append(line)
+
+    path.write_text("\n".join(new), encoding="utf-8")
 
 
 def main():
-    enable_ads_field = None
-    smali_file_path = None
+    """Main function to find and patch enableAds field."""
+    enable_ads, path = find_enable_ads(SMALI_ROOT)
 
-    for root, _, files in os.walk(SMALI_ROOT):
-        for file in files:
-            if file.endswith(".smali"):
-                path = os.path.join(root, file)
-                with open(path, "r", encoding="utf-8") as f:
-                    lines = f.readlines()
-                    for i, line in enumerate(lines):
-                        if '", enableAds="' in line:
-                            # Look only in the next 8 lines
-                            for j in range(1, 9):
-                                if i + j >= len(lines):
-                                    break
-                                candidate_line = lines[i + j]
-                                match = re.search(
-                                    r"iget-boolean\s+\S+,\s+\S+,\s+(\S+)",
-                                    candidate_line,
-                                )
-                                if match:
-                                    enable_ads_field = match.group(1)
-                                    smali_file_path = path
-                                    break
-                        if enable_ads_field:
-                            break
-                if enable_ads_field:
-                    break
-        if enable_ads_field:
-            break
-
-    if not enable_ads_field or not smali_file_path:
+    if not enable_ads or not path:
         raise ValueError(
             "Could not find enableAds field within 8 lines in smali files."
         )
 
-    print(f"Found enableAds field: {enable_ads_field} in {smali_file_path}")
+    print(f"Found enableAds field: {enable_ads}")
+    print(f"Located in: {path}")
 
-    # Patch logic remains unchanged
-    with open(smali_file_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+    patch_smali(path, enable_ads)
 
-    new_lines = []
-    in_constructor = False
-    patched = False
-    field_name_only = enable_ads_field.split("->")[1]
-
-    for line in lines:
-        if re.search(rf"\.field .* final {re.escape(field_name_only)}", line):
-            line = line.replace(" final", "")
-
-        if line.startswith(".method public constructor"):
-            in_constructor = True
-
-        if in_constructor and "return-void" in line and not patched:
-            new_lines.append("    move-object/from16 v0, p0\n")
-            new_lines.append("    const/4 v1, 0x0\n")
-            new_lines.append(f"    iput-boolean v1, v0, {enable_ads_field}\n")
-            patched = True
-
-        new_lines.append(line)
-
-    with open(smali_file_path, "w", encoding="utf-8") as f:
-        f.writelines(new_lines)
-
-    print(f"Patch applied successfully in {smali_file_path}")
+    print(f"Patch applied successfully: {path}")
 
 
 if __name__ == "__main__":
