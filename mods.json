@@ -1,0 +1,30 @@
+{
+    "$schema": "https://demodapk.netlify.app/schema.json",
+    "DemodAPK": {
+        "com.crunchyroll.crunchyroid": {
+            "app_name": "Funimation",
+            "package": "com.crunchyroll.funimation",
+            "apkeditor": {
+                "dex": false,
+                "output": "./build/Funimation"
+            },
+            "commands": {
+                "quietly": true,
+                "begin": [
+                    {
+                        "run": "python ./patch.py",
+                        "title": "Enable HideAds"
+                    },
+                    {
+                        "title": "Update [cyan]@values/colors[/cyan] for [u blue]Funimation[/u blue]",
+                        "run": "python ./scripts/colors.py -w -nd"
+                    },
+                    {
+                        "title": "Funimation Drawing",
+                        "run": "cp ./assets/drawing/*.xml $BASE_RESDIR/drawable/"
+                    }
+                ]
+            }
+        }
+    }
+}
